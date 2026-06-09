@@ -10,6 +10,19 @@
 			"version": "none",
 			"installMaven": "true",
 			"installGradle": "true"
+		},
+		"ghcr.io/devcontainers/features/java": {
+			"version": "latest",
+			"additionalVersions": "",
+			"jdkDistro": "ms",
+			"installGradle": "true",
+			"gradleVersion": "latest",
+			"installMaven": "true",
+			"mavenVersion": "latest",
+			"installAnt": "false",
+			"antVersion": "latest",
+			"installGroovy": "false",
+			"groovyVersion": "latest"
 		}
 	}
 
