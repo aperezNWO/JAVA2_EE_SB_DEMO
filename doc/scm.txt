@@ -34,8 +34,10 @@ git pull
 
     -- [_] spring boot dashboard.
 
+-- [_] Restart (if needed)
 
-
-
+    -- [_] see lower bar status (loading java)
 
 /////////////////////////////////////////
+
+
