@@ -1,0 +1,41 @@
+/////////////////////////////////////////
+// SCM
+/////////////////////////////////////////
+
+
+/////////////////////////////////////////
+// git
+/////////////////////////////////////////
+
+git add * 
+git commit -m"working folder update" -a 
+git push 
+git pull
+
+/////////////////////////////////////////
+// dev container
+/////////////////////////////////////////
+
+-- [_] Main Menu -> project setup.
+
+-- [_] Configure microVM Environment.
+
+-- [_] Setup my own container.
+
+-- [_] Select an envirnoment-> java  -> save -> next.
+
+-- [_] Extensions: 
+
+    -- [_] java
+
+    -- [_] java debugger.
+
+    -- [_] spring boot.
+
+    -- [_] spring boot dashboard.
+
+
+
+
+
+/////////////////////////////////////////
