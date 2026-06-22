@@ -54,7 +54,7 @@ public class DemoEndPoint {
     // https://9cdspc-8080.csb.app/health
     @GetMapping("/health")
     public String health() {
-        return "Fractal controller works!";
+        return "Controller Works!";
     }
     
     // Get All LOGS
