@@ -38,6 +38,10 @@ git pull
 
     -- [_] see lower bar status (loading java)
 
+-- [_] New version recompiling 
+
+    [_] fuser -k 8081
+
 /////////////////////////////////////////
 
 
