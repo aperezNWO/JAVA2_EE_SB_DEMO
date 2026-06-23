@@ -40,7 +40,7 @@ git pull
 
 -- [_] New version recompiling 
 
-    [_] fuser -k 8081
+    [_] fuser -k 8081/tcp
 
 /////////////////////////////////////////
 

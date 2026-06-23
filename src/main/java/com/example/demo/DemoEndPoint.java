@@ -12,18 +12,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.DAO.AccessLogDAO;
 import com.example.DAO.personasDAO;
-import com.example.demo.FractalManager.FractalKind;
-import com.example.demo.FractalManager.FractalPoint;
+import com.example.demo.FractalEngine.FractalKind;
+import com.example.demo.FractalEngine.FractalPoint;
 import com.example.entity.accessLog;
 import com.example.entity.personaTable;
+
 
 @RestController
 public class DemoEndPoint {
     //
-    private final AccessLogDAO accessLogDAO = new AccessLogDAO();
-    private final personasDAO _personasDAO = new personasDAO();
+    private final AccessLogDAO accessLogDAO  = new AccessLogDAO();
+    private final personasDAO _personasDAO   = new personasDAO();
     //
-    private final FractalManager fractalManager = new FractalManager();
+    private final FractalEngine fractalEngine = new FractalEngine();
 
 
     //
@@ -141,8 +142,8 @@ public class DemoEndPoint {
             @RequestParam double zoomStep) {
         
         // Convertimos manualmente usando el método que creamos en el enum
-        FractalKind fractalKind = FractalKind.fromValue(kind);
-        List<FractalPoint> points = fractalManager.getFractal(fractalKind, zoomInOut, zoomStep);
+        FractalKind fractalKind   = FractalKind.fromValue(kind);
+        List<FractalPoint> points = fractalEngine.getFractal(fractalKind, zoomInOut, zoomStep);
         return ResponseEntity.ok(points);
     }
 
