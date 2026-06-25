@@ -14,8 +14,8 @@ public class FractalEngine {
     // 1. Enum modificado con equivalencia numérica
     public enum FractalKind {
         MANDELBROT(1),
-        JULIA(3),
-        LEAF( 2);
+        JULIA     (2),
+        LEAF      (3);
 
         private final int value;
 
