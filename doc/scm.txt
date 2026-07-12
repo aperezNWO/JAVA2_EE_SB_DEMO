@@ -83,7 +83,10 @@ git pull
 --------------------------
 
 ## 0. save changes on git.
-git add * && git commit -m"fractal changes" && git push && git pull 
+   git add * 
+&& git commit -m"fractal changes" 
+&& git push 
+&& git pull 
 
 ## 1. docker build -t my-spring-boot-app .
 docker build -t java2_ee_sb_demo .
