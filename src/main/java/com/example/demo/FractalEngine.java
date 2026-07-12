@@ -7,15 +7,16 @@ import java.util.Random;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-//
 public class FractalEngine {
-    
- 
-    // 1. Enum modificado con equivalencia numérica
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // FRACTAL KIND ENUM
+    // ─────────────────────────────────────────────────────────────────────────
+
     public enum FractalKind {
         MANDELBROT(1),
-        JULIA     (2),
-        LEAF      (3);
+        JULIA(2),
+        LEAF(3);
 
         private final int value;
 
@@ -23,168 +24,247 @@ public class FractalEngine {
             this.value = value;
         }
 
-        // @JsonValue le dice a Jackson que represente este enum como su número entero al enviar datos al cliente
         @JsonValue
         public int getValue() {
             return value;
         }
 
-        // @JsonCreator le dice a Spring/Jackson cómo convertir un número del cliente de vuelta a la constante enum
         @JsonCreator
         public static FractalKind fromValue(int value) {
             for (FractalKind kind : FractalKind.values()) {
-                if (kind.value == value) {
+                if (kind.value == value)
                     return kind;
-                }
             }
             throw new IllegalArgumentException("Tipo de fractal inválido: " + value);
         }
     }
 
-    // 2. Estructura de puntos (Se mantiene igual, ideal para interactuar con Canvas en Angular)
-    public record FractalPoint(double x, double y, int intensity) {}
+    // ─────────────────────────────────────────────────────────────────────────
+    // SHARED TYPES
+    // ─────────────────────────────────────────────────────────────────────────
 
-    //
     /**
-     * Orquesta la generación de fractales delegando la lógica mediante un switch.
+     * Wire format returned to Angular.
+     * x, y — pixel coordinates (integers, typed as double for
+     * backwards-compatibility with existing consumers)
+     * intensity — [0…255] encoding of the escape-time iteration count:
+     * 0 → point is inside the set (maxIterations reached)
+     * 1…255 → iter * 255 / maxIterations
+     * Angular's _adaptRemotePoints back-calculates the iteration
+     * from this value, so the formula must stay consistent.
      */
-    public List<FractalPoint> getFractal(FractalKind fractalKind, boolean zoomInOut, double zoomStep) {
-        
-        // Uso de switch expression (disponible a partir de Java 14+) para un código más limpio
+    public record FractalPoint(double x, double y, int intensity) {
+    }
+
+    /**
+     * Complex-plane view window shared by all escape-time fractals.
+     * Sent directly by Angular's applyZoomToBounds() — the server no longer
+     * derives bounds from a zoomStep/center transform, it just renders
+     * whatever window it's given. Mirrors FractalBounds on the Angular side.
+     */
+    public record Bounds(double xMin, double xMax, double yMin, double yMax) {
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // CANVAS DIMENSIONS — single source of truth, must match Angular constants
+    // ─────────────────────────────────────────────────────────────────────────
+    private static final int CANVAS_WIDTH = 800;
+    private static final int CANVAS_HEIGHT = 600;
+    private static final int MAX_ITERATIONS = 500;
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // SHARED INTENSITY ENCODING
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Encodes the escape-time iteration count as an [0…255] intensity value.
+     *
+     * Must stay in sync with _adaptRemotePoints() in the Angular service:
+     * Angular: value = round(intensity * maxIterations / 255)
+     * Java: intensity = (iter == maxIterations) ? 0 : (iter * 255 / maxIterations)
+     *
+     * Special case: iter == maxIterations means the point is INSIDE the set
+     * → intensity 0 → Angular maps this back to maxIterations → black pixel.
+     */
+    private static int encodeIntensity(int iter, int maxIterations) {
+        return (iter == maxIterations) ? 0 : (iter * 255 / maxIterations);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // ROUTER
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Orchestrates fractal generation, delegating to the correct engine
+     * by fractal kind. Bounds/maxIterations are ignored for LEAF (IFS
+     * scatter has no escape-time window or iteration ceiling).
+     */
+    public List<FractalPoint> getFractal(
+            FractalKind fractalKind,
+            Bounds bounds,
+            int maxIterations) {
         return switch (fractalKind) {
-            case JULIA -> 
-                generateJulia(zoomInOut, zoomStep);
-
-            case LEAF  -> 
-                // Retorno temporal simulado para Mandelbrot, listo para cuando lo implementemos
-                generateLeaf();
-
-            case MANDELBROT -> 
-                // Retorno temporal simulado para Mandelbrot, listo para cuando lo implementemos
-                List.of(new FractalPoint(0, 0, 0));
-                
-            default -> 
-                throw new IllegalArgumentException("Tipo de fractal no soportado de manera interna.");
+            case MANDELBROT -> generateMandelbrot(bounds, maxIterations);
+            case JULIA -> generateJulia(bounds, maxIterations);
+            case LEAF -> generateLeaf();
         };
-   }
-   //
-   public static List<FractalPoint> generateJulia(boolean zoomInOut, double zoomStep) {
-    List<FractalPoint> points = new ArrayList<>();
-
-    // Configuración de la resolución de la cuadrícula
-    int width         = 800; 
-    int height        = 600;
-    int maxIterations = 500;
-
-    // Límites base del plano complejo para Julia
-    double minX = -1.5;
-    double maxX = 1.5;
-    double minY = -1.5;
-    double maxY = 1.5;
-
-    // Aplicar factor de zoom
-    double zoomFactor = zoomInOut ? (1.0 / zoomStep) : zoomStep;
-    double centerX    = 0.0;
-    double centerY    = 0.0;
-    
-    minX = centerX + (minX - centerX) * zoomFactor;
-    maxX = centerX + (maxX - centerX) * zoomFactor;
-    minY = centerY + (minY - centerY) * zoomFactor;
-    maxY = centerY + (maxY - centerY) * zoomFactor;
-
-    // Constante 'c' fija para el conjunto de Julia
-    double cRe = -0.400;
-    double cIm = 0.600;
-
-    // Evaluar la cuadrícula
-    for (int screenX = 0; screenX < width; screenX++) {
-        for (int screenY = 0; screenY < height; screenY++) {
-            
-            double zRe = minX + (screenX * (maxX - minX) / width);
-            double zIm = minY + (screenY * (maxY - minY) / height);
-
-            int iter = 0;
-            while (zRe * zRe + zIm * zIm <= 4.0 && iter < maxIterations) {
-                double nextRe = zRe * zRe - zIm * zIm + cRe;
-                double nextIm = 2.0 * zRe * zIm + cIm;
-                
-                zRe = nextRe;
-                zIm = nextIm;
-                iter++;
-            }
-
-            int intensity = (iter == maxIterations) ? 0 : (iter * 255 / maxIterations);
-            points.add(new FractalPoint(screenX, screenY, intensity));
-        }
     }
-    return points;
-   }
-   //
-   /**
-     * NEW: Iterated Function System (IFS) Tree Leaf Fractal (kind == 3)
-     * Generates a structural leaf shape via linear equations and probability metrics.
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // MANDELBROT (new)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Generates the Mandelbrot set on a CANVAS_WIDTH × CANVAS_HEIGHT grid.
+     *
+     * Formula: z(n+1) = z(n)² + c, z(0) = 0, c = pixel coordinate
+     *
+     * Bounds are sent directly by Angular's applyZoomToBounds() — no
+     * server-side zoom transform. DEFAULT_BOUNDS_MANDELBROT on the Angular
+     * side (Re ∈ [-2.0, 1.0], Im ∈ [-1.2, 1.2]) is what the client falls
+     * back to when unzoomed, so both ends agree on the default view.
+     *
+     * @param bounds        complex-plane view window (xMin/xMax/yMin/yMax)
+     * @param maxIterations escape-time iteration ceiling, supplied by the
+     *                      client so it stays in sync with _adaptRemotePoints
      */
-   public static List<FractalPoint> generateLeaf() {
-    List<FractalPoint> points = new ArrayList<>();
-    int width = 800;
-    int height = 600;
-    
-    // 2D Array to serve as a fast pixel map buffer
-    int[][] pixelGrid = new int[width][height];
-    
-    double x = 0.0;
-    double y = 0.0;
-    Random rand = new Random();
-    
-    // 150,000 iterations are ideal to densely populate the leaf skeleton without network bloating
-    int totalPoints = 150000; 
+    public static List<FractalPoint> generateMandelbrot(Bounds bounds, int maxIterations) {
+        List<FractalPoint> points = new ArrayList<>();
 
-    for (int i = 0; i < totalPoints; i++) {
-        double nextX, nextY;
-        int r = rand.nextInt(100);
+        double xRange = bounds.xMax() - bounds.xMin();
+        double yRange = bounds.yMax() - bounds.yMin();
 
-        // Barnsley/IFS Coefficient Matrix Mapping
-        if (r < 1) {
-            // Stem transformation
-            nextX = 0.0;
-            nextY = 0.16 * y;
-        } else if (r < 86) {
-            // Small leaflets/successive scaling transformation
-            nextX = 0.85 * x + 0.04 * y;
-            nextY = -0.04 * x + 0.85 * y + 1.6;
-        } else if (r < 93) {
-            // Left-side leaf expansion transformation
-            nextX = 0.20 * x - 0.26 * y;
-            nextY = 0.23 * x + 0.22 * y + 1.6;
-        } else {
-            // Right-side leaf expansion transformation
-            nextX = -0.15 * x + 0.28 * y;
-            nextY = 0.26 * x + 0.24 * y + 0.44;
-        }
+        for (int screenY = 0; screenY < CANVAS_HEIGHT; screenY++) {
+            for (int screenX = 0; screenX < CANVAS_WIDTH; screenX++) {
 
-        x = nextX;
-        y = nextY;
+                // Map pixel → complex plane coordinate
+                double cRe = bounds.xMin() + (screenX * xRange / CANVAS_WIDTH);
+                double cIm = bounds.yMin() + (screenY * yRange / CANVAS_HEIGHT);
 
-        // Map mathematical bounds (X: -2.182 to 2.655, Y: 0 to 9.96) to screen canvas (800x600)
-        int screenX = (int) Math.round((x + 2.182) * (width - 1) / (2.655 + 2.182));
-        // Invert Y axis so the leaf grows upwards on HTML Canvas structures
-        int screenY = (int) Math.round((9.96 - y) * (height - 1) / 9.96);
+                // Mandelbrot iteration: z starts at 0, c = pixel coordinate
+                double zRe = 0.0, zIm = 0.0;
+                int iter = 0;
 
-        if (screenX >= 0 && screenX < width && screenY >= 0 && screenY < height) {
-            // Assign an arbitrary base intensity value (e.g., 200) to represent the leaf tissue density
-            pixelGrid[screenX][screenY] = 200; 
-        }
-    }
+                while (zRe * zRe + zIm * zIm <= 4.0 && iter < maxIterations) {
+                    double nextRe = zRe * zRe - zIm * zIm + cRe;
+                    double nextIm = 2.0 * zRe * zIm + cIm;
+                    zRe = nextRe;
+                    zIm = nextIm;
+                    iter++;
+                }
 
-    // Convert the structural pixel grid map back to our uniform REST list payload
-    for (int px = 0; px < width; px++) {
-        for (int py = 0; py < height; py++) {
-            if (pixelGrid[px][py] > 0) {
-                points.add(new FractalPoint(px, py, pixelGrid[px][py]));
+                points.add(new FractalPoint(screenX, screenY, encodeIntensity(iter, maxIterations)));
             }
         }
+
+        return points;
     }
 
-    return points;
-  }
+    // ─────────────────────────────────────────────────────────────────────────
+    // JULIA (updated — zoom now uses centerX / centerY)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Generates the Julia set on a CANVAS_WIDTH × CANVAS_HEIGHT grid.
+     *
+     * Formula: z(n+1) = z(n)² + c, z(0) = pixel coordinate, c = fixed constant
+     *
+     * Bounds are sent directly by Angular's applyZoomToBounds() — no
+     * server-side zoom transform. DEFAULT_BOUNDS_JULIA on the Angular side
+     * (Re ∈ [-1.5, 1.5], Im ∈ [-1.5, 1.5]) is what the client falls back to
+     * when unzoomed, so both ends agree on the default view.
+     *
+     * @param bounds        complex-plane view window (xMin/xMax/yMin/yMax)
+     * @param maxIterations escape-time iteration ceiling, supplied by the
+     *                      client so it stays in sync with _adaptRemotePoints
+     */
+    public static List<FractalPoint> generateJulia(Bounds bounds, int maxIterations) {
+        List<FractalPoint> points = new ArrayList<>();
+
+        double xRange = bounds.xMax() - bounds.xMin();
+        double yRange = bounds.yMax() - bounds.yMin();
+
+        // Fixed complex constant c — unchanged from original
+        double cRe = -0.400;
+        double cIm = 0.600;
+
+        for (int screenY = 0; screenY < CANVAS_HEIGHT; screenY++) {
+            for (int screenX = 0; screenX < CANVAS_WIDTH; screenX++) {
+
+                // Map pixel → complex plane coordinate
+                // Julia: z starts at the pixel coordinate, c is fixed
+                double zRe = bounds.xMin() + (screenX * xRange / CANVAS_WIDTH);
+                double zIm = bounds.yMin() + (screenY * yRange / CANVAS_HEIGHT);
+
+                int iter = 0;
+                while (zRe * zRe + zIm * zIm <= 4.0 && iter < maxIterations) {
+                    double nextRe = zRe * zRe - zIm * zIm + cRe;
+                    double nextIm = 2.0 * zRe * zIm + cIm;
+                    zRe = nextRe;
+                    zIm = nextIm;
+                    iter++;
+                }
+
+                points.add(new FractalPoint(screenX, screenY, encodeIntensity(iter, maxIterations)));
+            }
+        }
+
+        return points;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // BARNSLEY FERN (unchanged)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * IFS Barnsley Fern — zoom does not apply to IFS attractors.
+     * Unchanged from the original implementation.
+     */
+    public static List<FractalPoint> generateLeaf() {
+        List<FractalPoint> points = new ArrayList<>();
+        int[][] pixelGrid = new int[CANVAS_WIDTH][CANVAS_HEIGHT];
+
+        double x = 0.0, y = 0.0;
+        Random rand = new Random();
+        int totalPoints = 150_000;
+
+        for (int i = 0; i < totalPoints; i++) {
+            double nextX, nextY;
+            int r = rand.nextInt(100);
+
+            if (r < 1) {
+                nextX = 0.0;
+                nextY = 0.16 * y;
+            } else if (r < 86) {
+                nextX = 0.85 * x + 0.04 * y;
+                nextY = -0.04 * x + 0.85 * y + 1.6;
+            } else if (r < 93) {
+                nextX = 0.20 * x - 0.26 * y;
+                nextY = 0.23 * x + 0.22 * y + 1.6;
+            } else {
+                nextX = -0.15 * x + 0.28 * y;
+                nextY = 0.26 * x + 0.24 * y + 0.44;
+            }
+
+            x = nextX;
+            y = nextY;
+
+            int screenX = (int) Math.round((x + 2.182) * (CANVAS_WIDTH - 1) / (2.655 + 2.182));
+            int screenY = (int) Math.round((9.96 - y) * (CANVAS_HEIGHT - 1) / 9.96);
+
+            if (screenX >= 0 && screenX < CANVAS_WIDTH && screenY >= 0 && screenY < CANVAS_HEIGHT) {
+                pixelGrid[screenX][screenY] = 200;
+            }
+        }
+
+        for (int px = 0; px < CANVAS_WIDTH; px++) {
+            for (int py = 0; py < CANVAS_HEIGHT; py++) {
+                if (pixelGrid[px][py] > 0) {
+                    points.add(new FractalPoint(px, py, pixelGrid[px][py]));
+                }
+            }
+        }
+
+        return points;
+    }
 }

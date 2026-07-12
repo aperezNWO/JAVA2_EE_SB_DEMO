@@ -46,6 +46,12 @@ git pull
 // DOCKER
 /////////////////////////////////////////
 
+--------------------------
+--------------------------
+-- FIRSR TIME BUILD
+--------------------------
+--------------------------
+
 ## BUILD FROM GITHUB CODESPACES  --> "Owned by 'aperezNWO'"
 0) https://github.com/codespaces
 
@@ -68,6 +74,28 @@ git pull
 
 # URL FOR RENDER : https://dashboard.render.com/
 6) docker.io/apereznwogmail/java2_ee_sb_demo:latest
+
+--------------------------
+--------------------------
+-- PUBLISH CHANGES
+--------------------------
+--------------------------
+
+## 0. save changes on git.
+git add * && git commit -m"fractal changes" && git push && git pull 
+
+## 1. docker build -t my-spring-boot-app .
+docker build -t java2_ee_sb_demo 
+
+## 2. docker tag my-spring-boot-app yourusername/your-repo:latest
+docker tag java2_ee_sb_demo:latest apereznwogmail/java2_ee_sb_demo:latest
+
+## 3. log into docker for publish
+## get PAT from https://app.docker.com/accounts/apereznwogmail/settings/personal-access-tokens
+echo "YOUR_PAT_HERE" | docker login --username apereznwogmail --password-stdin
+
+## 4. docker push yourusername/your-repo:latest
+docker push apereznwogmail/java2_ee_sb_demo:latest 
 
 --------------------------
 --------------------------
