@@ -43,5 +43,27 @@ git pull
     [_] fuser -k 8081/tcp
 
 /////////////////////////////////////////
+// DOCKER
+/////////////////////////////////////////
 
+## BUILD FROM GITHUB CODESPACES 
 
+1) docker build -t java2_ee_sb_demo 
+
+2) docker image ls 
+
+3) docker tag java2_ee_sb_demo:latest apereznwogmail/java2_ee_sb_demo:latest
+
+4) echo "YOUR_PAT_HERE" | docker login --username apereznwogmail --password-stdin
+
+5) docker push apereznwogmail/java2_ee_sb_demo:latest 
+
+URL FOR RENDER : 
+docker.io/apereznwogmail/java2_ee_sb_demo:latest
+
+--------------------------
+--------------------------
+
+https://docs.docker.com/guides/java/
+
+/////////////////////////////////////////
