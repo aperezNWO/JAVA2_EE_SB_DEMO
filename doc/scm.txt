@@ -12,6 +12,25 @@ git commit -m"working folder update" -a
 git push 
 git pull
 
+--------------------------
+--------------------------
+-- PUBLISH CHANGES
+--------------------------
+--------------------------
+
+##  Create a new PAT with correct scope
+
+Go to https://github.com/settings/tokens/new (make sure you're logged in as aperezNWO)
+Fill in:
+
+Note: codespaces-write
+Expiration: 90 days
+Scopes: ✅ repo (the top-level checkbox — this gives full repo access
+
+unset GITHUB_TOKEN
+git remote set-url origin https://aperezNWO:NEW_TOKEN_HERE@github.com/aperezNWO/JAVA2_EE_SB_DEMO.git
+git push
+
 /////////////////////////////////////////
 // dev container
 /////////////////////////////////////////
