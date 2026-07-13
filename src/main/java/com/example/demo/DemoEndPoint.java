@@ -136,4 +136,9 @@ public class DemoEndPoint {
         List<FractalPoint> points = fractalEngine.getFractal(fractalKind, bounds, iterations);
         return ResponseEntity.ok(points);
     }
+
+    @GetMapping("/getJavaVersion")
+    public String getJavaVersion() {
+        return System.getProperty("java.version");
+    }
 }
