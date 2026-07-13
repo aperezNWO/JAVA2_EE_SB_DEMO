@@ -108,7 +108,7 @@ git push
 && git pull 
 
 ## 1. docker build -t my-spring-boot-app .
-docker build -t java2_ee_sb_demo .
+# docker build -t java2_ee_sb_demo .
 docker buildx build -t java2_ee_sb_demo .
 
 ## 2. docker tag my-spring-boot-app yourusername/your-repo:latest
