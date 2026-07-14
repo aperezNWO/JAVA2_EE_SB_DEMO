@@ -70,15 +70,7 @@ git push
 -- FIRSR TIME BUILD
 --------------------------
 --------------------------
-## devcontainer
-{
-	"name": "JAVA2_EE_SB_DEMO",
-	"features": {
-			"ghcr.io/devcontainers/features/docker-in-docker:2": {
-			"version": "latest"
-		}	
-	}
-}
+0) Create Dockerfile. (ask i.a.)
 
 1) After saving the file, you need to apply these changes to your environment:
 
