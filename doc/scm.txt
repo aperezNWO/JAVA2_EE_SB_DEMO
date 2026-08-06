@@ -100,7 +100,9 @@ git push
 0) https://github.com/codespaces
 
 # docker must be installed on desktop. it was from codespaces, only visual studio code extensions was installed
-1) docker build -t java2_ee_sb_demo .
+# powershell
+1.1) (Get-Content mvnw -Raw) -replace "`r`n", "`n" | Set-Content mvnw -NoNewline
+1.2) docker build -t java2_ee_sb_demo .
 
 # list images built
 2) docker image ls 
@@ -111,7 +113,8 @@ git push
 # log into docker for publish
 # get PAT from https://app.docker.com/accounts/apereznwogmail/settings/personal-access-tokens
 ## must return 'Login Succeeded'
-4) echo "YOUR_PAT_HERE" | docker login --username apereznwogmail --password-stdin
+# 4) echo "YOUR_PAT_HERE" | docker login --username apereznwogmail --password-stdin
+4.1) docker login
 
 # publish in docker hub
 # https://hub.docker.com/
