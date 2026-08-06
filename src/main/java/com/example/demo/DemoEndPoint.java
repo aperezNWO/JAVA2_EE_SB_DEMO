@@ -141,4 +141,13 @@ public class DemoEndPoint {
     public String getJavaVersion() {
         return System.getProperty("java.version");
     }
+
+    /**
+     * Minimal endpoint targeted by ping services (e.g., Cronjob.org).
+     * Returns an empty HTTP 200 OK response with 0-byte content length.
+     */
+    @GetMapping("/ping")
+    public ResponseEntity<Void> ping() {
+        return ResponseEntity.ok().build();
+    }
 }
