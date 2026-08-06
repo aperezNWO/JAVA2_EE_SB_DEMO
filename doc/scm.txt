@@ -30,7 +30,7 @@ Scopes: ✅ repo (the top-level checkbox — this gives full repo access
 
 git add * 
 git commit -m"scm.txt changes"
-git remote set-url origin https://aperezNWO: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@github.com/aperezNWO/JAVA2_EE_SB_DEMO.git
+git remote set-url origin https://aperezNWO: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@github.com/aperezNWO/JAVA2_EE_SB_DEMO.git
 git push --set-upstream origin main
 
 --------------------------
