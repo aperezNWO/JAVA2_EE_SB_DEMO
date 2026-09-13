@@ -142,6 +142,11 @@ public class DemoEndPoint {
         return System.getProperty("java.version");
     }
 
+    @GetMapping("/getSpringBootVersion")
+    public String getSpringBootVersion() {
+        return org.springframework.boot.SpringBootVersion.getVersion();
+    }
+
     /**
      * Minimal endpoint targeted by ping services (e.g., Cronjob.org).
      * Returns an empty HTTP 200 OK response with 0-byte content length.

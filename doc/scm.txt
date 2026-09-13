@@ -2,9 +2,8 @@
 // SCM
 /////////////////////////////////////////
 
-
 /////////////////////////////////////////
-// git
+// git INIT
 /////////////////////////////////////////
 
 echo "# DART_DEMO_002" >> README.md
@@ -12,45 +11,6 @@ git init
 git add README.md
 git commit -m "first commit"
 git branch -M main
-
-## PATH 1 - NO EXTERNAL AUTH REQUIRED
-git remote add origin https://github.com/aperezNWO/JAVA2_EE_SB_DEMO.git
-git add *
-git push -u origin main
-
-## PATH 2 - EXTERNAL AUTH REQUIRED
-##  Create a new PAT with correct scope
-
-Go to https://github.com/settings/tokens/new (make sure you're logged in as aperezNWO)
-Fill in:
-
-Note: codespaces-write
-Expiration: 90 days
-Scopes: ✅ repo (the top-level checkbox — this gives full repo access
-
-git add * 
-git commit -m"scm.txt changes"
-git remote set-url origin https://aperezNWO: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@github.com/aperezNWO/JAVA2_EE_SB_DEMO.git
-git push --set-upstream origin main
-
---------------------------
---------------------------
--- PUBLISH CHANGES
---------------------------
---------------------------
-
-##  Create a new PAT with correct scope
-
-Go to https://github.com/settings/tokens/new (make sure you're logged in as aperezNWO)
-Fill in:
-
-Note: codespaces-write
-Expiration: 90 days
-Scopes: ✅ repo (the top-level checkbox — this gives full repo access
-
-unset GITHUB_TOKEN
-git remote set-url origin https://aperezNWO:NEW_TOKEN_HERE@github.com/aperezNWO/JAVA2_EE_SB_DEMO.git
-git push
 
 /////////////////////////////////////////
 // dev container
@@ -83,14 +43,49 @@ git push
     [_] fuser -k 8081/tcp
 
 /////////////////////////////////////////
+// INSTALL SDK
+/////////////////////////////////////////
+
+# JAVA
+
+    winget install -e --id EclipseAdoptium.Temurin.21.JDK
+
+    C:\Program Files\Eclipse Adoptium\jdk-21.0.12.8-hotspot\bin\
+
+    "CANNOT LOCATE JAVA INSTALLATION IN SPECIFIED JDKHOME"
+    C:\Program Files\Eclipse Adoptium\jdk-21.0.12.8-hotspot
+    ¿Do you want to use the default version?
+
+    (powershell)
+    $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-21.0.12.8-hotspot"
+    echo $env:JAVA_HOME
+
+    java -version
+
+        Picked up JAVA_TOOL_OPTIONS: -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8
+        openjdk version "26.0.2.1" 2026-08-18
+        OpenJDK Runtime Environment Temurin-26.0.2.1+1 (build 26.0.2.1+1)
+        OpenJDK 64-Bit Server VM Temurin-26.0.2.1+1 (build 26.0.2.1+1, mixed mode, sharing)
+
+/////////////////////////////////////////
+// RUN SPRINGBOOT LOCAL
+/////////////////////////////////////////
+
+-- [_] SPRING BOOT VISUAL STUDIO CODE EXTENSION
+
+-- [_] TERMINAL OUTPUT
+
+        .   ____          _            __ _ _
+        /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+        ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+        \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+        '  |____| .__|_| |_|_| |_\__, | / / / /
+        =========|_|==============|___/=/_/_/_/
+
+/////////////////////////////////////////
 // DOCKER
 /////////////////////////////////////////
 
---------------------------
---------------------------
--- FIRSR TIME BUILD
---------------------------
---------------------------
 0) Create Dockerfile. (ask i.a.)
 
 1) After saving the file, you need to apply these changes to your environment:
@@ -127,7 +122,7 @@ git push
 
 --------------------------
 --------------------------
--- PUBLISH CHANGES
+-- GIT UPDATE
 --------------------------
 --------------------------
 
@@ -136,21 +131,6 @@ git push
 && git commit -m"fractal changes" 
 && git push 
 && git pull 
-
-## 1. docker build -t my-spring-boot-app .
-# docker build -t java2_ee_sb_demo .
-docker buildx build -t java2_ee_sb_demo .
-
-## 2. docker tag my-spring-boot-app yourusername/your-repo:latest
-docker tag java2_ee_sb_demo:latest apereznwogmail/java2_ee_sb_demo:latest
-
-## 3. log into docker for publish
-## get/create PAT from https://app.docker.com/accounts/apereznwogmail/settings/personal-access-tokens
-## create with read/write scope
-echo "YOUR_PAT_HERE" | docker login --username apereznwogmail --password-stdin
-
-## 4. docker push yourusername/your-repo:latest
-docker push apereznwogmail/java2_ee_sb_demo:latest 
 
 --------------------------
 --------------------------
