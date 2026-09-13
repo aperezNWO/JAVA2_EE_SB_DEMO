@@ -130,7 +130,9 @@ Note: codespaces-write
 Expiration: 90 days
 Scopes: ✅ repo (the top-level checkbox — this gives full repo access
 
+git add * 
 git remote set-url origin https://aperezNWO:<YOUR_PAT_HERE>@github.com/aperezNWO/DART_DEMO_002.git
+git commit -m"<describe_changes_here>" 
 git push --set-upstream origin main
 
 
