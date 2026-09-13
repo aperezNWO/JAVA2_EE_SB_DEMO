@@ -107,8 +107,26 @@ git branch -M main
 # https://hub.docker.com/
 5) docker push apereznwogmail/java2_ee_sb_demo:latest 
 
-# URL FOR RENDER : https://dashboard.render.com/
-6) docker.io/apereznwogmail/java2_ee_sb_demo:latest
+
+
+--------------------------
+--------------------------
+-- REMOTE TESTING
+--------------------------
+--------------------------
+
+## URL FOR RENDER : https://dashboard.render.com/
+     ## deploy last reference
+     docker.io/apereznwogmail/java2_ee_sb_demo:latest
+
+## REMOTE TESTING
+
+    https://java2-ee-sb-demo-latest-gk09.onrender.com/getSpringBootVersion
+    
+ 
+## CRON JOB ==> https://console.cron-job.org/jobs
+
+   https://java2-ee-sb-demo-latest-gk09.onrender.com/ping 
 
 --------------------------
 --------------------------
