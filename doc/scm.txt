@@ -86,16 +86,6 @@ git branch -M main
 // DOCKER
 /////////////////////////////////////////
 
-0) Create Dockerfile. (ask i.a.)
-
-1) After saving the file, you need to apply these changes to your environment:
-
-- Open the Command Palette in VS Code (press Ctrl+Shift+P or Cmd+Shift+P on Mac).
-- Type and select: "Codespaces: Rebuild Container".
-
-## BUILD FROM GITHUB CODESPACES  --> "Owned by 'aperezNWO'"
-0) https://github.com/codespaces
-
 # docker must be installed on desktop. it was from codespaces, only visual studio code extensions was installed
 # powershell
 1.1) (Get-Content mvnw -Raw) -replace "`r`n", "`n" | Set-Content mvnw -NoNewline
