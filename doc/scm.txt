@@ -126,11 +126,23 @@ git branch -M main
 --------------------------
 --------------------------
 
-## 0. save changes on git.
-   git add * 
-&& git commit -m"fractal changes" 
-&& git push 
-&& git pull 
+## PATH 1 - NO EXTERNAL AUTH REQUIRED
+git remote add origin https://github.com/aperezNWO/DART_DEMO_002.git
+git push -u origin main
+
+## PATH 2 - EXTERNAL AUTH REQUIRED
+##  Create a new PAT with correct scope
+
+Go to https://github.com/settings/tokens/new (make sure you're logged in as aperezNWO)
+Fill in:
+
+Note: codespaces-write
+Expiration: 90 days
+Scopes: ✅ repo (the top-level checkbox — this gives full repo access
+
+git remote set-url origin https://aperezNWO:<YOUR_PAT_HERE>@github.com/aperezNWO/DART_DEMO_002.git
+git push --set-upstream origin main
+
 
 --------------------------
 --------------------------
