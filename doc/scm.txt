@@ -170,9 +170,8 @@ Expiration: 90 days
 Scopes: ✅ repo (the top-level checkbox — this gives full repo access
 
 git add *
-git commit -m""
-git remote set-url origin https://aperezNWO:<YOUR_PAT_HERE>@github.com/aperezNWO/DART_DEMO_002.git
-git commit -m"<describe_changes_here>"
+git commit -m"[Application JAVA2_EE_SB_DEMO] v[1.0.0]" -m"1) health() and AppVersion() endpoints"
+git remote set-url origin https://aperezNWO:<YOUR_PAT_HERE>@github.com/aperezNWO/JAVA2_EE_SB_DEMO.git
 git push --set-upstream origin main
 
 
