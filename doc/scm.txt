@@ -24,7 +24,7 @@ git branch -M main
 
 -- [_] Select an envirnoment-> java  -> save -> next.
 
--- [_] Extensions: 
+-- [_] Extensions:
 
     -- [_] java
 
@@ -38,7 +38,7 @@ git branch -M main
 
     -- [_] see lower bar status (loading java)
 
--- [_] New version recompiling 
+-- [_] New version recompiling
 
     [_] fuser -k 8081/tcp
 
@@ -57,7 +57,7 @@ git branch -M main
     ¿Do you want to use the default version?
 
     (powershell)
-    $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-21.0.12.8-hotspot"
+    $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot"
     echo $env:JAVA_HOME
 
     java -version
@@ -71,6 +71,19 @@ git branch -M main
 // RUN SPRINGBOOT LOCAL
 /////////////////////////////////////////
 
+-- [_] COMMANDL LINE
+
+        $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot"
+
+        java -version
+
+        .\mvnw test-compile
+
+        .\mvnw clean compile
+
+        .\mvnw spring-boot:run
+
+
 -- [_] SPRING BOOT VISUAL STUDIO CODE EXTENSION
 
 -- [_] TERMINAL OUTPUT
@@ -83,31 +96,40 @@ git branch -M main
         =========|_|==============|___/=/_/_/_/
 
 /////////////////////////////////////////
+// LOCAL TESTING
+/////////////////////////////////////////
+
+(poweshell)
+--[_] curl.exe http://localhost:8081/health
+
+/////////////////////////////////////////
 // DOCKER
 /////////////////////////////////////////
 
 # docker must be installed on desktop. it was from codespaces, only visual studio code extensions was installed
 # powershell
-1.1) (Get-Content mvnw -Raw) -replace "`r`n", "`n" | Set-Content mvnw -NoNewline
-1.2) docker build -t java2_ee_sb_demo .
+    # (Get-Content mvnw -Raw) -replace "`r`n", "`n" | Set-Content mvnw -NoNewline
+    docker build -t java2_ee_sb_demo .
 
 # list images built
-2) docker image ls 
+   docker image ls
 
 # create a tag previous to publish
-3) docker tag java2_ee_sb_demo:latest apereznwogmail/java2_ee_sb_demo:latest
+   docker tag java2_ee_sb_demo:latest apereznwogmail/java2_ee_sb_demo:latest
 
-# log into docker for publish
-# get PAT from https://app.docker.com/accounts/apereznwogmail/settings/personal-access-tokens
-## must return 'Login Succeeded'
-# 4) echo "YOUR_PAT_HERE" | docker login --username apereznwogmail --password-stdin
-4.1) docker login
+## log into docker for publish
+
+    ## option 1) docker desktop.
+    docker login
+    ## option 2) get PAT from https://app.docker.com/accounts/apereznwogmail/settings/personal-access-tokens
+    echo "YOUR_PAT_HERE" | docker login --username apereznwogmail --password-stdin
+
+    ## must return 'Login Succeeded'
+
 
 # publish in docker hub
 # https://hub.docker.com/
-5) docker push apereznwogmail/java2_ee_sb_demo:latest 
-
-
+    docker push apereznwogmail/java2_ee_sb_demo:latest
 
 --------------------------
 --------------------------
@@ -122,11 +144,10 @@ git branch -M main
 ## REMOTE TESTING
 
     https://java2-ee-sb-demo-latest-gk09.onrender.com/getSpringBootVersion
-    
- 
+
 ## CRON JOB ==> https://console.cron-job.org/jobs
 
-   https://java2-ee-sb-demo-latest-gk09.onrender.com/ping 
+   https://java2-ee-sb-demo-latest-gk09.onrender.com/ping
 
 --------------------------
 --------------------------
@@ -148,9 +169,10 @@ Note: codespaces-write
 Expiration: 90 days
 Scopes: ✅ repo (the top-level checkbox — this gives full repo access
 
-git add * 
+git add *
+git commit -m""
 git remote set-url origin https://aperezNWO:<YOUR_PAT_HERE>@github.com/aperezNWO/DART_DEMO_002.git
-git commit -m"<describe_changes_here>" 
+git commit -m"<describe_changes_here>"
 git push --set-upstream origin main
 
 

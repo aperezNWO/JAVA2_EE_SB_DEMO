@@ -3,7 +3,9 @@ package com.example.demo;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,21 @@ public class DemoEndPoint {
     private final personasDAO _personasDAO = new personasDAO();
     private final FractalEngine fractalEngine = new FractalEngine();
 
+    // Dictionary matching the C++ endpoint dictionary pattern
+    private static final Map<String, Map<String, String>> endpointDictionary = new LinkedHashMap<>();
+
+    static {
+        endpointDictionary.put("HEALTH_ENDPOINT"         , Map.of("path", "/health"                     , "description", "Print all endpoints"));
+        endpointDictionary.put("PING_ENDPOINT"           , Map.of("path", "/zero"                       , "description", "Render workaround"));
+        endpointDictionary.put("APP_VERSION_ENDPOINT"    , Map.of("path", "/api/system/app-version"  , "description", "Get Application Version"));
+        endpointDictionary.put("STD_VERSION_ENDPOINT"    , Map.of("path", "/api/system/language-version", "description", "Get Standard Java Version"));
+        endpointDictionary.put("SERVER_VERSION_ENDPOINT" , Map.of("path", "/api/system/server-version"  , "description", "Get Http Server Version"));
+        endpointDictionary.put("FRACTAL_ENDPOINT"        , Map.of("path", "/api/fractals/generate"      , "description", "Fractal Generation Endpoint"));
+        endpointDictionary.put("GET_LOGS_ENDPOINT"       , Map.of("path", "/api/data/getAllLogs"        , "description", "Get last 100 records of application log"));
+        endpointDictionary.put("GET_PERSONS_ENDPOINT"    , Map.of("path", "/api/data/getAllPersons"     , "description", "Get a sample list of persons"));
+        endpointDictionary.put("DIJKSTRA_ENDPOINT"       , Map.of("path", "/api/algorithm/GenerateRandomVertex_Java"   , "description", "Generate Random Vertex via Dijkstra"));
+    }
+
     // ── Unchanged endpoints ───────────────────────────────────────────────────
 
     @GetMapping("/hello")
@@ -36,11 +53,40 @@ public class DemoEndPoint {
     }
 
     @GetMapping("/health")
-    public String health() {
-        return "Controller Works!";
+    public ResponseEntity<Map<String, Object>> health() {
+        String springBootVersion = org.springframework.boot.SpringBootVersion.getVersion();
+        if (springBootVersion == null) {
+            springBootVersion = "Unknown Version";
+        }
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("server", "Java Spring Boot Web Server - v[" + springBootVersion + "] Working!");
+
+        // Build endpoints list matching the C++ structure
+        var endpointsList = new java.util.ArrayList<Map<String, String>>();
+        for (var entry : endpointDictionary.entrySet()) {
+            Map<String, String> info = entry.getValue();
+            Map<String, String> endpointItem = new LinkedHashMap<>();
+            endpointItem.put("key", entry.getKey());
+            endpointItem.put("path", info.get("path"));
+            endpointItem.put("description", info.get("description"));
+            endpointsList.add(endpointItem);
+        }
+        response.put("endpoints", endpointsList);
+
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/getAllLogs")
+    /**
+     * Minimal endpoint targeted by ping services (e.g., Cronjob.org).
+     * Returns an empty HTTP 200 OK response with 0-byte content length.
+     */
+    @GetMapping("/ping")
+    public ResponseEntity<Void> ping() {
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/api/data/getAllLogs")
     public ResponseEntity<List<accessLog>> getAllLogs() {
         try {
             return ResponseEntity.ok(accessLogDAO.getAllLogs());
@@ -49,7 +95,7 @@ public class DemoEndPoint {
         }
     }
 
-    @GetMapping("/getAllPersons")
+    @GetMapping("/api/data/getAllPersons")
     public ResponseEntity<List<personaTable>> getPersons() {
         try {
             return ResponseEntity.ok(_personasDAO.getAllPersons());
@@ -66,7 +112,7 @@ public class DemoEndPoint {
         return new String(encodedBytes, utf8Charset);
     }
 
-    @GetMapping("/GenerateRandomVertex_SpringBoot")
+    @GetMapping("/api/algorithm/GenerateRandomVertex_Java")
     public String GenerateRandomVertex_SpringBoot() {
         int p_vertexSize = 9;
         int p_sampleSize = 23;
@@ -83,33 +129,6 @@ public class DemoEndPoint {
 
     // ── Fractal endpoint (updated) ────────────────────────────────────────────
 
-    /**
-     * Generates a fractal and returns a JSON point array consumed by the
-     * Angular _fetchAndRender pipeline.
-     *
-     * Parameters
-     * ──────────
-     * kind — 1=Mandelbrot, 2=Julia, 3=Barnsley Fern
-     * xMin/xMax — complex-plane Re bounds of the current view window.
-     * yMin/yMax — complex-plane Im bounds of the current view window.
-     * Sent directly by Angular's applyZoomToBounds() — the
-     * server no longer derives the window from a zoom
-     * step/center transform, it just renders the window
-     * it's given. Optional: falls back to each fractal's
-     * default view (matching Angular's DEFAULT_BOUNDS_*)
-     * when omitted or invalid.
-     * maxIterations — escape-time iteration ceiling. Optional, defaults to 500.
-     * Ignored for Barnsley Fern (kind=3), which has no
-     * escape-time window or iteration ceiling.
-     *
-     * Examples
-     * ────────
-     * Default unzoomed Mandelbrot:
-     * /api/fractals/generate?kind=1
-     *
-     * A zoomed Julia view:
-     * /api/fractals/generate?kind=2&xMin=-0.7&xMax=0.3&yMin=-0.2&yMax=0.8&maxIterations=500
-     */
     @GetMapping("/api/fractals/generate")
     public ResponseEntity<List<FractalPoint>> getFractal(
             @RequestParam int kind,
@@ -120,8 +139,6 @@ public class DemoEndPoint {
             @RequestParam(required = false) Integer maxIterations) {
         FractalKind fractalKind = FractalKind.fromValue(kind);
 
-        // Default bounds per fractal type if the client does not supply them —
-        // must match Angular's DEFAULT_BOUNDS_MANDELBROT / DEFAULT_BOUNDS_JULIA.
         Bounds defaultBounds = (fractalKind == FractalKind.MANDELBROT)
                 ? new Bounds(-2.0, 1.0, -1.2, 1.2)
                 : new Bounds(-1.5, 1.5, -1.5, 1.5);
@@ -137,22 +154,19 @@ public class DemoEndPoint {
         return ResponseEntity.ok(points);
     }
 
-    @GetMapping("/getJavaVersion")
+    @GetMapping("/api/system/language-version")
     public String getJavaVersion() {
         return System.getProperty("java.version");
     }
 
-    @GetMapping("/getSpringBootVersion")
+    @GetMapping("/api/system/server-version")
     public String getSpringBootVersion() {
         return org.springframework.boot.SpringBootVersion.getVersion();
     }
 
-    /**
-     * Minimal endpoint targeted by ping services (e.g., Cronjob.org).
-     * Returns an empty HTTP 200 OK response with 0-byte content length.
-     */
-    @GetMapping("/ping")
-    public ResponseEntity<Void> ping() {
-        return ResponseEntity.ok().build();
+    @GetMapping("/api/system/app-version")
+    public String getAppVersion() {
+        return "1.0.0";
     }
+
 }
