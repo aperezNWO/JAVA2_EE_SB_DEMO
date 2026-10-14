@@ -126,9 +126,8 @@ git branch -M main
 
     ## must return 'Login Succeeded'
 
-
 # publish in docker hub
-# https://hub.docker.com/
+    # https://hub.docker.com/
     docker push apereznwogmail/java2_ee_sb_demo:latest
 
 --------------------------
